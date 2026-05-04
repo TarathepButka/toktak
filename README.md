@@ -57,14 +57,16 @@ Navigate to the project root and install dependencies.
 ```bash
 flutter pub get
 
+# If you make changes to models, run the build runner:
+# flutter pub run build_runner build --delete-conflicting-outputs
+```
+``` bash
 # Check emulator
 flutter emulators
 
 # Launch emulator
 flutter emulators --launch <emulator_id>
 
-# If you make changes to models, run the build runner:
-# flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 Run the app on your preferred device/emulator:
