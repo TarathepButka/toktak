@@ -1,0 +1,56 @@
+[
+  {
+    "id": "mock-1",
+    "user_id": "user-1",
+    "video_url": "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+    "thumbnail_url": "https://picsum.photos/seed/v1/400/700",
+    "caption": "🔥 Amazing sunset vibes #nature #travel",
+    "likes_count": 1234,
+    "comments_count": 56,
+    "views_count": 9876,
+    "is_liked": false,
+    "created_at": "2026-05-01T10:00:00Z",
+    "author": {
+      "id": "user-1",
+      "username": "traveler_joe",
+      "display_name": "Joe Travel",
+      "avatar_url": "https://picsum.photos/seed/u1/100/100"
+    }
+  },
+  {
+    "id": "mock-2",
+    "user_id": "user-2",
+    "video_url": "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
+    "thumbnail_url": "https://picsum.photos/seed/v2/400/700",
+    "caption": "✨ Cooking made easy #food #recipe",
+    "likes_count": 5678,
+    "comments_count": 123,
+    "views_count": 45000,
+    "is_liked": true,
+    "created_at": "2026-05-01T09:00:00Z",
+    "author": {
+      "id": "user-2",
+      "username": "chef_maria",
+      "display_name": "Maria Cooks",
+      "avatar_url": "https://picsum.photos/seed/u2/100/100"
+    }
+  },
+  {
+    "id": "mock-3",
+    "user_id": "user-3",
+    "video_url": "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+    "thumbnail_url": "https://picsum.photos/seed/v3/400/700",
+    "caption": "😂 When your cat discovers the camera #pets #funny",
+    "likes_count": 12000,
+    "comments_count": 890,
+    "views_count": 150000,
+    "is_liked": false,
+    "created_at": "2026-05-01T08:00:00Z",
+    "author": {
+      "id": "user-3",
+      "username": "pet_lover99",
+      "display_name": "Cat Videos",
+      "avatar_url": "https://picsum.photos/seed/u3/100/100"
+    }
+  }
+]
