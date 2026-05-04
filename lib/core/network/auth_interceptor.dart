@@ -12,7 +12,8 @@ class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final token = _storage.getAuthToken();
-    if (token != null) {
+    // Only add token if not already present (allows skipping by setting empty string)
+    if (token != null && !options.headers.containsKey('Authorization')) {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);

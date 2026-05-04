@@ -94,12 +94,10 @@ func (m *MinIOClient) ensureBucket(ctx context.Context) error {
 	return nil
 }
 
-// PresignUpload generates a presigned PUT URL the Flutter client uses to
-// upload the video directly to MinIO (no backend memory overhead).
-// The host in the URL is rewritten to publicEndpoint so emulators/browsers
-// can reach MinIO even when the backend connects to it via localhost.
+// PresignUpload generates a presigned PUT URL for direct file upload.
 func (m *MinIOClient) PresignUpload(ctx context.Context, objectName, contentType string) (*url.URL, error) {
-	u, err := m.client.PresignedPutObject(ctx, m.bucket, objectName, presignTTL)
+	// Use Presign method to ensure better URL generation and potential header inclusion
+	u, err := m.client.Presign(ctx, "PUT", m.bucket, objectName, presignTTL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -120,17 +118,16 @@ func (m *MinIOClient) PublicURL(objectName string) string {
 	return m.publicEndpoint + "/" + m.bucket + "/" + objectName
 }
 
-// rewriteHost replaces the internal MinIO host with the public-facing endpoint
-// so presigned URLs work from Android emulators and external clients.
+// rewriteHost replaces the internal MinIO host with the public-facing endpoint.
+// It modifies the URL object in place to ensure all components (Path, Query) are preserved.
 func (m *MinIOClient) rewriteHost(u *url.URL) *url.URL {
 	pub, err := url.Parse(m.publicEndpoint)
 	if err != nil {
-		return u // fallback: return as-is
+		return u
 	}
-	rewritten := *u
-	rewritten.Scheme = pub.Scheme
-	rewritten.Host = pub.Host
-	return &rewritten
+	u.Scheme = pub.Scheme
+	u.Host = pub.Host
+	return u
 }
 
 // Upload streams a file directly from the server (for server-side upload flow).

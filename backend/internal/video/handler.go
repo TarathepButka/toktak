@@ -36,36 +36,60 @@ func (h *Handler) GetVideo(c *gin.Context) {
 
 func (h *Handler) UploadVideo(c *gin.Context) {
 	userID := h.currentUserID(c)
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 500<<20)
-
-	if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed to parse upload: " + err.Error()})
-		return
-	}
-
-	file, header, err := c.Request.FormFile("video")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "video file required"})
-		return
-	}
-	defer file.Close()
 
 	if h.minio == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"message": "storage not configured"})
 		return
 	}
 
-	caption := c.Request.FormValue("caption")
-	objectName := fmt.Sprintf("%s/%d_%s", userID, time.Now().UnixMilli(), header.Filename)
-	contentType := header.Header.Get("Content-Type")
-	if contentType == "" {
-		contentType = "video/mp4"
-	}
+	var videoURL string
+	var caption string
 
-	videoURL, err := h.minio.Upload(c.Request.Context(), objectName, contentType, file, header.Size)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "storage upload failed: " + err.Error()})
-		return
+	// Handle JSON (Presigned flow) vs Multipart (Direct flow)
+	if c.ContentType() == "application/json" {
+		var payload struct {
+			ObjectName string `json:"object_name"`
+			Caption    string `json:"caption"`
+		}
+		if err := c.ShouldBindJSON(&payload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid payload"})
+			return
+		}
+		if payload.ObjectName == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "object_name required"})
+			return
+		}
+		videoURL = h.minio.PublicURL(payload.ObjectName)
+		caption = payload.Caption
+	} else {
+		// Legacy Multipart Flow
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 500<<20)
+
+		if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "failed to parse upload: " + err.Error()})
+			return
+		}
+
+		file, header, err := c.Request.FormFile("video")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "video file required"})
+			return
+		}
+		defer file.Close()
+
+		caption = c.Request.FormValue("caption")
+		objectName := fmt.Sprintf("%s/%d_%s", userID, time.Now().UnixMilli(), header.Filename)
+		contentType := header.Header.Get("Content-Type")
+		if contentType == "" {
+			contentType = "video/mp4"
+		}
+
+		url, err := h.minio.Upload(c.Request.Context(), objectName, contentType, file, header.Size)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "storage upload failed: " + err.Error()})
+			return
+		}
+		videoURL = url
 	}
 
 	thumbnailURL := fmt.Sprintf("https://picsum.photos/seed/%d/400/700", time.Now().UnixMilli()%1000)
