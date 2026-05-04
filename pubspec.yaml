@@ -1,0 +1,80 @@
+name: toktak
+description: "TikTok-like video caching app"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Code Generation
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Functional Programming
+  fpdart: ^1.1.0
+
+  # Local Storage
+  get_storage: ^2.1.1
+
+  # Dependency Injection
+  get_it: ^8.0.3
+  injectable: ^2.5.0
+
+  # Networking
+  dio: ^5.7.0
+
+  # Auth
+  google_sign_in: ^6.2.2
+  sign_in_with_apple: ^6.1.4
+  flutter_line_sdk: ^2.3.1
+
+  # Video
+  video_player: ^2.9.2
+  flutter_cache_manager: ^3.4.1
+  visibility_detector: ^0.4.0+2
+
+  # UI
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  flutter_staggered_grid_view: ^0.7.0
+  font_awesome_flutter: ^10.8.0
+  google_fonts: ^6.2.1
+  flutter_dotenv: ^6.0.1
+
+  # Upload
+  file_picker: ^8.1.7
+  mime: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+  # Code Generation
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  injectable_generator: ^2.6.2
+
+  # Testing
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/mock/
+    - assets/images/
