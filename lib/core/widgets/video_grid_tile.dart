@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:toktak/core/utils/video_cache_manager.dart';
 import 'package:video_player/video_player.dart';
 import 'package:toktak/core/theme/app_theme.dart';
 import 'package:toktak/features/feed/domain/entities/video.dart';
@@ -25,6 +26,7 @@ class VideoGridTile extends StatefulWidget {
 class _VideoGridTileState extends State<VideoGridTile> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
+  String? _loadingVideoUrl;
 
   @override
   void initState() {
@@ -47,16 +49,34 @@ class _VideoGridTileState extends State<VideoGridTile> {
   void _initializeVideo() {
     if (_controller != null) return;
 
-    _controller =
-        VideoPlayerController.networkUrl(Uri.parse(widget.video.videoUrl));
-    _controller!.initialize().then((_) {
+    final videoUrl = widget.video.videoUrl;
+    _loadingVideoUrl = videoUrl;
+
+    VideoCacheManager.getFile(videoUrl).then((videoFile) async {
+      if (!mounted || _loadingVideoUrl != videoUrl) {
+        return;
+      }
+
+      final controller = VideoPlayerController.file(videoFile);
+      await controller.initialize();
+
+      if (!mounted || _loadingVideoUrl != videoUrl) {
+        controller.dispose();
+        return;
+      }
+
+      controller.setLooping(true);
+      controller.setVolume(0); // Mute for grid preview
+
       if (mounted && widget.isActive) {
+        controller.play();
+      }
+
+      if (mounted) {
         setState(() {
+          _controller = controller;
           _isInitialized = true;
         });
-        _controller?.setLooping(true);
-        _controller?.setVolume(0); // Mute for grid preview
-        _controller?.play();
       }
     }).catchError((error) {
       debugPrint("Video Preview Error: $error");
@@ -64,6 +84,7 @@ class _VideoGridTileState extends State<VideoGridTile> {
   }
 
   void _disposeVideo() {
+    _loadingVideoUrl = null;
     _controller?.pause();
     _controller?.dispose();
     _controller = null;

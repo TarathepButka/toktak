@@ -8,6 +8,7 @@ import 'package:toktak/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:toktak/features/feed/presentation/pages/feed_page.dart';
 import 'package:toktak/features/profile/presentation/pages/profile_page.dart';
 import 'package:toktak/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:toktak/features/search/presentation/bloc/search_bloc.dart';
 import 'package:toktak/features/search/presentation/pages/search_page.dart';
 import 'package:toktak/features/upload/presentation/pages/upload_page.dart';
 import 'package:toktak/injection.dart';
@@ -22,6 +23,7 @@ class TokTakApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
             create: (_) => getIt<AuthBloc>()..add(const AuthEvent.checkAuth())),
         BlocProvider<FeedBloc>(create: (_) => getIt<FeedBloc>()),
+        BlocProvider<SearchBloc>(create: (_) => getIt<SearchBloc>()),
         BlocProvider<ProfileBloc>(create: (_) => getIt<ProfileBloc>()),
       ],
       child: MaterialApp(
@@ -136,6 +138,9 @@ class _MainShellState extends State<_MainShell> {
               if (index == 0) {
                 // ถ้าย้ำปุ่ม Home
                 context.read<FeedBloc>().add(const FeedEvent.refreshFeed());
+              } else if (index == 1) {
+                // ถ้าย้ำปุ่ม Search
+                context.read<SearchBloc>().add(const SearchEvent.load());
               } else if (index == 3) {
                 // ถ้าย้ำ Profile
                 final userId = context
@@ -151,6 +156,13 @@ class _MainShellState extends State<_MainShell> {
             } else {
               // --- ถ้ากดเปลี่ยนหน้าปกติ ---
               setState(() => _currentIndex = index);
+              if (index == 1) {
+                final searchBloc = context.read<SearchBloc>();
+                searchBloc.state.maybeWhen(
+                  initial: () => searchBloc.add(const SearchEvent.load()),
+                  orElse: () {},
+                );
+              }
               if (index == 3) {
                 final userId = context
                     .read<AuthBloc>()

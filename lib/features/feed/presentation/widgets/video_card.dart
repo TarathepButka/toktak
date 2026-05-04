@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:toktak/core/theme/app_theme.dart';
+import 'package:toktak/core/utils/video_cache_manager.dart';
 import 'package:toktak/features/feed/data/models/video_model.dart';
 import 'package:video_player/video_player.dart';
 
@@ -29,6 +30,7 @@ class _VideoCardState extends State<VideoCard> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _showPlayButton = false;
+  String? _loadingVideoUrl;
 
   @override
   void initState() {
@@ -39,6 +41,11 @@ class _VideoCardState extends State<VideoCard> {
   @override
   void didUpdateWidget(VideoCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.video.videoUrl != oldWidget.video.videoUrl) {
+      _disposeController();
+      _initializeVideo();
+      return;
+    }
     if (widget.isActive != oldWidget.isActive) {
       if (widget.isActive) {
         _controller?.play();
@@ -49,22 +56,44 @@ class _VideoCardState extends State<VideoCard> {
   }
 
   Future<void> _initializeVideo() async {
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(widget.video.videoUrl),
-    );
-
     try {
-      await _controller!.initialize();
-      _controller!.setLooping(true);
-      if (widget.isActive) {
-        _controller!.play();
+      final videoUrl = widget.video.videoUrl;
+      _loadingVideoUrl = videoUrl;
+      final videoFile = await VideoCacheManager.getFile(videoUrl);
+
+      if (!mounted || _loadingVideoUrl != videoUrl) {
+        return;
       }
+
+      final controller = VideoPlayerController.file(videoFile);
+      await controller.initialize();
+
+      if (!mounted || _loadingVideoUrl != videoUrl) {
+        controller.dispose();
+        return;
+      }
+
+      controller.setLooping(true);
+      if (widget.isActive) {
+        controller.play();
+      }
+
       if (mounted) {
-        setState(() => _isInitialized = true);
+        setState(() {
+          _controller = controller;
+          _isInitialized = true;
+        });
       }
     } catch (e) {
       debugPrint('Video init error: $e');
     }
+  }
+
+  void _disposeController() {
+    _loadingVideoUrl = null;
+    _controller?.dispose();
+    _controller = null;
+    _isInitialized = false;
   }
 
   void _togglePlayPause() {
@@ -80,7 +109,7 @@ class _VideoCardState extends State<VideoCard> {
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _disposeController();
     super.dispose();
   }
 
