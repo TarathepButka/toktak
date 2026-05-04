@@ -6,7 +6,7 @@ TokTak is a modern, full-stack short-video application clone (inspired by TikTok
 
 - **Infinite Video Feed**: Smooth, auto-playing video feed with visibility detection.
 - **Social Authentication**: Seamless login via Google and LINE SDK.
-- **Video Upload**: Direct video uploads to MinIO object storage using presigned URLs.
+- **Video Upload**: Direct video uploads to MinIO object storage.
 - **Search**: Discover trending videos and users.
 - **User Profile**: View user information and their uploaded videos.
 - **Clean Architecture**: Highly modular, testable, and maintainable codebase.
