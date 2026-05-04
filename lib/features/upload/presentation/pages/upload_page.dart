@@ -91,15 +91,7 @@ class _UploadPageViewState extends State<_UploadPageView> {
           if (!context.mounted) return;
           state.maybeWhen(
             success: (result) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🎉 Video uploaded successfully!'),
-                  backgroundColor: AppTheme.primary,
-                ),
-              );
-              if (context.mounted) {
-                Navigator.of(context).pop(true);
-              }
+              Navigator.of(context).pop(true);
             },
             orElse: () {},
           );
